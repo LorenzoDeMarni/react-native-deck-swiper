@@ -762,7 +762,7 @@ class Swiper extends Component {
   }
 
   pushCardToStack = (renderedCards, index, position, key, firstCard) => {
-    console.log("Using Lorenzo's Repo")
+    console.log("Using Lorenzo's Repo test 2")
     const { cards } = this.props
     const stackCardZoomStyle = this.calculateStackCardZoomStyle(position)
     const stackCard = this.props.renderCard(cards[index], index)
