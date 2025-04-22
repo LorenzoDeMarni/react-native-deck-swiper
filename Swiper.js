@@ -468,6 +468,7 @@ class Swiper extends Component {
   }
 
   animateStack = () => {
+    console.log('✅ Using my custom Swiper');
     const { secondCardIndex, swipedAllCards } = this.state
     let { stackSize, infinite, showSecondCard, cards } = this.props
     let index = secondCardIndex
