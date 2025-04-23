@@ -651,20 +651,24 @@ class Swiper extends Component {
   }
 
   calculateStackCardZoomStyle = (position, firstCard) => {
-    // Apply opacity animation only to the first stacked card (position 0)
-    const opacityStyle = position === 0 ? { opacity: this.state.nextCardOpacity } : {}
-    
+    const isSecondCard = position === 1
+    const opacityStyle = isSecondCard ? { opacity: this.state.nextCardOpacity } : {}
+  
     return [
       styles.card,
       this.getCardStyle(),
       {
         zIndex: position * -1,
-        transform: [{ scale: this.state[`stackScale${position}`] }, { translateX: this.state[`stackPosition${position}`] }]
+        transform: [
+          { scale: this.state[`stackScale${position}`] },
+          { translateX: this.state[`stackPosition${position}`] }
+        ]
       },
       opacityStyle,
       this.props.cardStyle
     ]
   }
+  
 
   calculateSwipeBackCardStyle = () => [
     styles.card,
