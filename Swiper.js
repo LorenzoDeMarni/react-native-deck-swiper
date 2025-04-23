@@ -350,12 +350,23 @@ class Swiper extends Component {
   }
 
   resetTopCard = cb => {
-    Animated.spring(this.state.pan, {
-      toValue: 0,
-      friction: this.props.topCardResetAnimationFriction,
-      tension: this.props.topCardResetAnimationTension,
-      useNativeDriver: true
-    }).start(cb)
+    // Create parallel animations for card position and opacity
+    Animated.parallel([
+      // Reset the card position
+      Animated.spring(this.state.pan, {
+        toValue: 0,
+        friction: this.props.topCardResetAnimationFriction,
+        tension: this.props.topCardResetAnimationTension,
+        useNativeDriver: true
+      }),
+      
+      // Animate the next card opacity back to dim
+      Animated.timing(this.state.nextCardOpacity, {
+        toValue: 0.05,
+        duration: this.props.swipeAnimationDuration,
+        useNativeDriver: true
+      })
+    ]).start(cb)
 
     this.state.pan.setOffset({
       x: 0,
@@ -421,14 +432,26 @@ class Swiper extends Component {
   ) => {
     this.setState({ panResponderLocked: true })
     this.animateStack()
-    Animated.timing(this.state.pan, {
-      toValue: {
-        x: x * SWIPE_MULTIPLY_FACTOR,
-        y: y * SWIPE_MULTIPLY_FACTOR
-      },
-      duration: this.props.swipeAnimationDuration,
-      useNativeDriver: true
-    }).start(() => {
+    
+    // Create parallel animations for position and opacity
+    Animated.parallel([
+      // Card position animation
+      Animated.timing(this.state.pan, {
+        toValue: {
+          x: x * SWIPE_MULTIPLY_FACTOR,
+          y: y * SWIPE_MULTIPLY_FACTOR
+        },
+        duration: this.props.swipeAnimationDuration,
+        useNativeDriver: true
+      }),
+      
+      // Next card opacity animation - ensure it's fully visible when the swipe completes
+      Animated.timing(this.state.nextCardOpacity, {
+        toValue: 1,
+        duration: this.props.swipeAnimationDuration,
+        useNativeDriver: true
+      })
+    ]).start(() => {
       this.setSwipeBackCardXY(x, y, () => {
         mustDecrementCardIndex = mustDecrementCardIndex
           ? true
@@ -603,8 +626,8 @@ class Swiper extends Component {
     this.state.previousCardX.setValue(previousCardDefaultPositionX)
     this.state.previousCardY.setValue(previousCardDefaultPositionY)
     
-    // Reset opacity for next card to initial value
-    this.state.nextCardOpacity.setValue(0.05)
+    // Do NOT reset opacity here instantly - it will be animated in resetTopCard
+    // or handled by the swipe animation
     
     // Reattach listeners
     this.state.pan.x.removeAllListeners()
