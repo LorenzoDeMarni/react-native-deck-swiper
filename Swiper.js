@@ -642,15 +642,21 @@ class Swiper extends Component {
     ]
   }
 
-  calculateStackCardZoomStyle = (position) => [
-    styles.card,
-    this.getCardStyle(),
-    {
-      zIndex: position * -1,
-      transform: [{ scale: this.state[`stackScale${position}`] }, { translateX: this.state[`stackPosition${position}`] }]
-    },
-    this.props.cardStyle
-  ]
+  calculateStackCardZoomStyle = (position) => {
+    // Special handling for the second card (position 0) to fade based on first card position
+    const opacity = position === 0 ? this.interpolateNextCardOpacity() : 1;
+    
+    return [
+      styles.card,
+      this.getCardStyle(),
+      {
+        zIndex: position * -1,
+        opacity,
+        transform: [{ scale: this.state[`stackScale${position}`] }, { translateX: this.state[`stackPosition${position}`] }]
+      },
+      this.props.cardStyle
+    ]
+  }
 
   calculateSwipeBackCardStyle = () => [
     styles.card,
@@ -710,6 +716,29 @@ class Swiper extends Component {
       inputRange: this.props.inputRotationRange,
       outputRange: this.props.outputRotationRange
     })
+
+  interpolateNextCardOpacity = () => {
+    const animatedValueX = Math.abs(this._animatedValueX)
+    const animatedValueY = Math.abs(this._animatedValueY)
+    let opacity
+
+    // Use the horizontal or vertical movement whichever is greater
+    if (animatedValueX > animatedValueY) {
+      opacity = this.state.pan.x.interpolate({
+        inputRange: [0, this.props.horizontalThreshold],
+        outputRange: [0.5, 1],
+        extrapolate: 'clamp'
+      })
+    } else {
+      opacity = this.state.pan.y.interpolate({
+        inputRange: [0, this.props.verticalThreshold],
+        outputRange: [0.5, 1],
+        extrapolate: 'clamp'
+      })
+    }
+
+    return opacity
+  }
 
   render = () => {
     const { pointerEvents, backgroundColor, marginTop, marginBottom, containerStyle, swipeBackCard, testID } = this.props
