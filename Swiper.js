@@ -41,7 +41,7 @@ class Swiper extends Component {
     this.state = {
       ...calculateCardIndexes(props.cardIndex, props.cards),
       pan: new Animated.ValueXY(),
-      nextCardOpacity: new Animated.Value(0.5),
+      nextCardOpacity: new Animated.Value(0.05),
       previousCardX: new Animated.Value(props.previousCardDefaultPositionX),
       previousCardY: new Animated.Value(props.previousCardDefaultPositionY),
       swipedAllCards: false,
@@ -158,7 +158,7 @@ class Swiper extends Component {
     const animatedValueY = Math.abs(this._animatedValueY)
     const maxMovement = Math.max(animatedValueX, animatedValueY)
     const threshold = Math.max(this.props.horizontalThreshold, this.props.verticalThreshold)
-    const nextCardOpacity = Math.min(0.5 + (maxMovement / threshold) * 0.5, 1)
+    const nextCardOpacity = Math.min(0.05 + (maxMovement / threshold) * 0.95, 1)
     this.state.nextCardOpacity.setValue(nextCardOpacity)
 
     let { overlayOpacityHorizontalThreshold, overlayOpacityVerticalThreshold } = this.props
