@@ -41,7 +41,7 @@ class Swiper extends Component {
     this.state = {
       ...calculateCardIndexes(props.cardIndex, props.cards),
       pan: new Animated.ValueXY(),
-      nextCardOpacity: new Animated.Value(0.8),
+      nextCardOpacity: new Animated.Value(0.5),
       previousCardX: new Animated.Value(props.previousCardDefaultPositionX),
       previousCardY: new Animated.Value(props.previousCardDefaultPositionY),
       swipedAllCards: false,
@@ -158,7 +158,7 @@ class Swiper extends Component {
     const animatedValueY = Math.abs(this._animatedValueY)
     const maxMovement = Math.max(animatedValueX, animatedValueY)
     const threshold = Math.max(this.props.horizontalThreshold, this.props.verticalThreshold)
-    const nextCardOpacity = 0.8 + Math.min((maxMovement / threshold) * 0.2, 0.2)
+    const nextCardOpacity = Math.min(0.5 + (maxMovement / threshold) * 0.5, 1)
     this.state.nextCardOpacity.setValue(nextCardOpacity)
 
     let { overlayOpacityHorizontalThreshold, overlayOpacityVerticalThreshold } = this.props
@@ -651,15 +651,9 @@ class Swiper extends Component {
   }
 
   calculateStackCardZoomStyle = (position, firstCard) => {
-    let opacityStyle = {};
-    
-    if (position === 0) {
-      opacityStyle = { opacity: this.state.nextCardOpacity };
-    } else if (position > 0) {
-      const dimFactor = Math.max(0.3, 0.9 - (position * 0.3));
-      opacityStyle = { opacity: Animated.multiply(this.state.nextCardOpacity, dimFactor) };
-    }
-    
+    const isSecondCard = position === 1
+    const opacityStyle = isSecondCard ? { opacity: this.state.nextCardOpacity} : {}
+  
     return [
       styles.card,
       this.getCardStyle(),
