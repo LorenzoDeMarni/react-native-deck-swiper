@@ -27,7 +27,8 @@ const rebuildStackAnimatedValues = (props) => {
   const { stackSize, stackSeparation, stackScale } = props
 
   for (let position = 0; position < stackSize; position++) {
-    stackPositionsAndScales[`stackPosition${position}`] = new Animated.Value(stackSeparation * position)
+    const diminishFactor = Math.max(0.25, 1 - position * 0.3)
+    stackPositionsAndScales[`stackPosition${position}`] = new Animated.Value(stackSeparation * position * diminishFactor)
     stackPositionsAndScales[`stackScale${position}`] = new Animated.Value((100 - stackScale * position) * 0.01)
   }
 
@@ -41,7 +42,7 @@ class Swiper extends Component {
     this.state = {
       ...calculateCardIndexes(props.cardIndex, props.cards),
       pan: new Animated.ValueXY(),
-
+      nextCardOpacity: new Animated.Value(0.5),
       previousCardX: new Animated.Value(props.previousCardDefaultPositionX),
       previousCardY: new Animated.Value(props.previousCardDefaultPositionY),
       swipedAllCards: false,
@@ -152,6 +153,14 @@ class Swiper extends Component {
 
   onPanResponderMove = (event, gestureState) => {
     this.props.onSwiping(this._animatedValueX, this._animatedValueY)
+
+    // Update next card opacity based on swipe distance
+    const animatedValueX = Math.abs(this._animatedValueX)
+    const animatedValueY = Math.abs(this._animatedValueY)
+    const maxMovement = Math.max(animatedValueX, animatedValueY)
+    const threshold = Math.max(this.props.horizontalThreshold, this.props.verticalThreshold)
+    const nextCardOpacity = Math.min(0.5 + (maxMovement / threshold) * 0.5, 1)
+    this.state.nextCardOpacity.setValue(nextCardOpacity)
 
     let { overlayOpacityHorizontalThreshold, overlayOpacityVerticalThreshold } = this.props
     if (!overlayOpacityHorizontalThreshold) {
@@ -475,7 +484,8 @@ class Swiper extends Component {
 
     while (stackSize-- > 1 && showSecondCard && !swipedAllCards) {
       if (this.state[`stackPosition${stackSize}`] && this.state[`stackScale${stackSize}`]) {
-        const newSeparation = this.props.stackSeparation * (stackSize - 1)
+        const diminishFactor = Math.max(0.25, 1 - (stackSize - 1) * 0.3)
+        const newSeparation = this.props.stackSeparation * (stackSize - 1) * diminishFactor
         const newScale = (100 - this.props.stackScale * (stackSize - 1)) * 0.01
         Animated.parallel([
           Animated.spring(this.state[`stackPosition${stackSize}`], {
@@ -642,15 +652,21 @@ class Swiper extends Component {
     ]
   }
 
-  calculateStackCardZoomStyle = (position) => [
-    styles.card,
-    this.getCardStyle(),
-    {
-      zIndex: position * -1,
-      transform: [{ scale: this.state[`stackScale${position}`] }, { translateX: this.state[`stackPosition${position}`] }] 
-    },
-    this.props.cardStyle
-  ]
+  calculateStackCardZoomStyle = (position, firstCard) => {
+    // Apply opacity animation only to the first stacked card (position 0)
+    const opacityStyle = position === 0 ? { opacity: this.state.nextCardOpacity } : {}
+    
+    return [
+      styles.card,
+      this.getCardStyle(),
+      {
+        zIndex: position * -1,
+        transform: [{ scale: this.state[`stackScale${position}`] }, { translateX: this.state[`stackPosition${position}`] }]
+      },
+      opacityStyle,
+      this.props.cardStyle
+    ]
+  }
 
   calculateSwipeBackCardStyle = () => [
     styles.card,
@@ -764,7 +780,7 @@ class Swiper extends Component {
 
   pushCardToStack = (renderedCards, index, position, key, firstCard) => {
     const { cards } = this.props
-    const stackCardZoomStyle = this.calculateStackCardZoomStyle(position)
+    const stackCardZoomStyle = this.calculateStackCardZoomStyle(position, firstCard)
     const stackCard = this.props.renderCard(cards[index], index)
     const swipableCardStyle = this.calculateSwipableCardStyle()
     const renderOverlayLabel = this.renderOverlayLabel()
