@@ -652,7 +652,7 @@ class Swiper extends Component {
 
   calculateStackCardZoomStyle = (position, firstCard) => {
     const isSecondCard = position === 1
-    const opacityStyle = isSecondCard ? { opacity: this.state.nextCardOpacity } : {}
+    const opacityStyle = isSecondCard ? { opacity: this.state.nextCardOpacity *0.5} : {}
   
     return [
       styles.card,
