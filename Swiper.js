@@ -27,8 +27,7 @@ const rebuildStackAnimatedValues = (props) => {
   const { stackSize, stackSeparation, stackScale } = props
 
   for (let position = 0; position < stackSize; position++) {
-    const diminishFactor = Math.max(0.25, 1 - position * 0.3)
-    stackPositionsAndScales[`stackPosition${position}`] = new Animated.Value(stackSeparation * position * diminishFactor)
+    stackPositionsAndScales[`stackPosition${position}`] = new Animated.Value(stackSeparation * position)
     stackPositionsAndScales[`stackScale${position}`] = new Animated.Value((100 - stackScale * position) * 0.01)
   }
 
@@ -484,8 +483,7 @@ class Swiper extends Component {
 
     while (stackSize-- > 1 && showSecondCard && !swipedAllCards) {
       if (this.state[`stackPosition${stackSize}`] && this.state[`stackScale${stackSize}`]) {
-        const diminishFactor = Math.max(0.25, 1 - (stackSize - 1) * 0.3)
-        const newSeparation = this.props.stackSeparation * (stackSize - 1) * diminishFactor
+        const newSeparation = this.props.stackSeparation * (stackSize - 1)
         const newScale = (100 - this.props.stackScale * (stackSize - 1)) * 0.01
         Animated.parallel([
           Animated.spring(this.state[`stackPosition${stackSize}`], {
