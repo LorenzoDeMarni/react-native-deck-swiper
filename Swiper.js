@@ -214,17 +214,14 @@ class Swiper extends Component {
 
   onPanResponderGrant = (event, gestureState) => {
     this.props.dragStart && this.props.dragStart()
+    
+    // Ensure we start clean with any new touch
     if (!this.state.panResponderLocked) {
-      this.state.pan.setOffset({
-        x: 0,
-        y: 0
-      })
+      this.state.pan.setValue({ x: 0, y: 0 })
+      this.state.pan.setOffset({ x: 0, y: 0 })
+      this._animatedValueX = 0
+      this._animatedValueY = 0
     }
-
-    this.state.pan.setValue({
-      x: 0,
-      y: 0
-    })
   }
 
   validPanResponderRelease = () => {
@@ -261,7 +258,7 @@ class Swiper extends Component {
         x: 0,
         y: 0
       })
-
+      
       return
     }
 
@@ -270,6 +267,7 @@ class Swiper extends Component {
     const animatedValueX = Math.abs(this._animatedValueX)
     const animatedValueY = Math.abs(this._animatedValueY)
 
+    // Only count as a swipe if there was significant movement
     const isSwiping =
       animatedValueX > horizontalThreshold || animatedValueY > verticalThreshold
 
@@ -581,17 +579,36 @@ class Swiper extends Component {
         },
         this.resetPanAndScale
       )
+      
+      // Add a slight delay to ensure state updates before next interaction
+      setTimeout(() => {
+        if (this._mounted) {
+          this._animatedValueX = 0
+          this._animatedValueY = 0
+        }
+      }, 50)
     }
   }
 
   resetPanAndScale = () => {
     const {previousCardDefaultPositionX, previousCardDefaultPositionY} = this.props
+    
+    // Fully reset the pan state
     this.state.pan.setValue({ x: 0, y: 0 })
     this.state.pan.setOffset({ x: 0, y: 0})
     this._animatedValueX = 0
     this._animatedValueY = 0
+    
+    // Reset the previous card position
     this.state.previousCardX.setValue(previousCardDefaultPositionX)
     this.state.previousCardY.setValue(previousCardDefaultPositionY)
+    
+    // Reset opacity for next card to initial value
+    this.state.nextCardOpacity.setValue(0.05)
+    
+    // Reattach listeners
+    this.state.pan.x.removeAllListeners()
+    this.state.pan.y.removeAllListeners()
     this.state.pan.x.addListener(value => this._animatedValueX = value.value)
     this.state.pan.y.addListener(value => this._animatedValueY = value.value)
   }
