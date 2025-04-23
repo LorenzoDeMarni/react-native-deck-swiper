@@ -651,9 +651,24 @@ class Swiper extends Component {
   }
 
   calculateStackCardZoomStyle = (position, firstCard) => {
-    const isSecondCard = position === 1
-    const opacityStyle = isSecondCard ? { opacity: this.state.nextCardOpacity *0.5} : {}
-  
+    // Progressive dimming for cards in the stack
+    // Apply dimming based on card position - deeper cards get dimmer
+    let opacityStyle = {};
+    
+    if (position === 0) {
+      // First card in stack uses the animation value
+      opacityStyle = { opacity: this.state.nextCardOpacity };
+    } else if (position === 1) {
+      // Second card dimmed more
+      opacityStyle = { opacity: this.state.nextCardOpacity.__getValue() * 0.6 };
+    } else if (position === 2) {
+      // Third card dimmed even more
+      opacityStyle = { opacity: this.state.nextCardOpacity.__getValue() * 0.3 };
+    } else {
+      // All other cards very dim
+      opacityStyle = { opacity: this.state.nextCardOpacity.__getValue() * 0.2 };
+    }
+    
     return [
       styles.card,
       this.getCardStyle(),
