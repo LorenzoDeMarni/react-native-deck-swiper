@@ -751,7 +751,7 @@ class Swiper extends Component {
     if (animatedValueX > animatedValueY) {
       opacity = this.state.pan.x.interpolate({
         inputRange: this.props.inputOverlayLabelsOpacityRangeX,
-        outputRange: this.props.outputOverlayLabelsOpacityRangeX
+        outputRange: [0.9, 0, 0, 0, 0.9]
       })
     } else {
       opacity = this.state.pan.y.interpolate({
@@ -1054,7 +1054,67 @@ Swiper.defaultProps = {
   outputOverlayLabelsOpacityRangeX: [1, 0, 0, 0, 1],
   outputOverlayLabelsOpacityRangeY: [1, 0, 0, 0, 1],
   outputRotationRange: ['-10deg', '0deg', '10deg'],
-  overlayLabels: null,
+  overlayLabels: {
+    left: {
+      title: '❌ DELETE',
+      style: {
+        label: {
+          backgroundColor: 'rgba(255, 70, 70, 0.9)',
+          color: 'white',
+          fontSize: 24,
+          fontWeight: 'bold',
+          borderRadius: 10,
+          padding: 10,
+          textAlign: 'right',
+          overflow: 'hidden',
+          borderWidth: 2,
+          borderColor: '#fff',
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.3,
+          shadowRadius: 3,
+          elevation: 5
+        },
+        wrapper: {
+          flexDirection: 'column',
+          alignItems: 'flex-end',
+          justifyContent: 'flex-start',
+          marginTop: 50,
+          marginLeft: -30,
+          paddingRight: 20
+        }
+      }
+    },
+    right: {
+      title: '✅ KEEP',
+      style: {
+        label: {
+          backgroundColor: 'rgba(70, 220, 70, 0.9)',
+          color: 'white',
+          fontSize: 24,
+          fontWeight: 'bold',
+          borderRadius: 10,
+          padding: 10,
+          overflow: 'hidden',
+          borderWidth: 2,
+          borderColor: '#fff',
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.3,
+          shadowRadius: 3,
+          elevation: 5
+        },
+        wrapper: {
+          flexDirection: 'column',
+          alignItems: 'flex-start',
+          justifyContent: 'flex-start',
+          marginTop: 50,
+          marginLeft: 30,
+          paddingLeft: 20
+        }
+      }
+    }
+  },
   overlayLabelStyle: {
     fontSize: 45,
     fontWeight: 'bold',
